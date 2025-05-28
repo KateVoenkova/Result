@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}Чтение: {{ book.title }}{% endblock %}
+
+{% block styles %}
+<style>
+:root {
+    --reader-bg: #f5f5f5;
+    --reader-content-bg: #fff;
+    --reader-text: #333;
+    --reader-controls: #4a76a8;
+    --reader-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --reader-bg: #1a1a1a;
+        --reader-content-bg: #2d2d2d;
+        --reader-text: #e6e6e6;
+        --reader-controls: #5d8ac9;
+        --reader-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+}
+
+.reader-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 120px);
+    background-color: var(--reader-bg);
+    padding: 0;
+}
+
+.reader-header {
+    padding: 15px 20px;
+    background-color: var(--reader-content-bg);
+    box-shadow: var(--reader-shadow);
+    z-index: 10;
+}
+
+.reader-title {
+    font-size: 1.2rem;
+    margin: 0;
+    color: var(--reader-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reader-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 20px 15px;
+}
+
+.reader-content {
+    flex: 1;
+    padding: 25px;
+    background-color: var(--reader-content-bg);
+    color: var(--reader-text);
+    line-height: 1.8;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    box-shadow: var(--reader-shadow);
+    overflow-wrap: break-word;
+    hyphens: auto;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.reader-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.reader-btn {
+    padding: 10px 20px;
+    background-color: var(--reader-controls);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.reader-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.reader-btn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.page-indicator {
+    font-size: 0.9rem;
+    color: var(--reader-text);
+    opacity: 0.8;
+}
+
+/* Анимации перелистывания */
+@keyframes slideFromRight {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideFromLeft {
+    from { transform: translateX(-30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.slide-right {
+    animation: slideFromRight 0.3s ease-out;
+}
+
+.slide-left {
+    animation: slideFromLeft 0.3s ease-out;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .reader-wrapper {
+        min-height: calc(100vh - 60px);
+    }
+
+    .reader-header {
+        padding: 10px 15px;
+    }
+
+    .reader-title {
+        font-size: 1rem;
+    }
+
+    .reader-container {
+        padding: 10px;
+    }
+
+    .reader-content {
+        padding: 20px;
+        font-size: 1rem;
+        max-height: 65vh;
+    }
+
+    .reader-btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    .reader-controls {
+        padding: 10px 0;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .reader-content {
+        padding: 15px;
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    .reader-btn {
+        padding: 6px 12px;
+    }
+
+    .page-indicator {
+        font-size: 0.8rem;
+    }
+}
+
+/* Настройки типографики для лучшей читаемости */
+.reader-content p {
+    margin-bottom: 1.2em;
+    text-align: justify;
+}
+
+.reader-content br {
+    content: "";
+    display: block;
+    margin-bottom: 0.8em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reader-wrapper">
+    <div class="reader-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="reader-title">{{ book.title }}</h1>
+                <div>
+                    <a href="{{ url_for('book_page', book_id=book.id) }}"
+                       class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="d-none d-sm-inline">Назад</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container reader-container">
+        <div class="reader-content" id="readerContent"
+             data-book-id="{{ book.id }}"
+             data-current-page="{{ current_page }}"
+             data-total-pages="{{ total_pages }}">
+            {{ pages[current_page-1]|replace('\n', '<br>')|safe }}
+        </div>
+
+        <div class="reader-controls">
+            <button class="reader-btn" id="prevPage"
+                    {% if current_page <= 1 %}disabled{% endif %}>
+                <i class="fas fa-arrow-left"></i>
+                <span class="d-none d-sm-inline">Назад</span>
+            </button>
+
+            <div class="page-indicator">
+                <span id="currentPage">{{ current_page }}</span> / {{ total_pages }}
+            </div>
+
+            <button class="reader-btn" id="nextPage"
+                    {% if current_page >= total_pages %}disabled{% endif %}>
+                <span class="d-none d-sm-inline">Вперед</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const readerContent = document.getElementById('readerContent');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const currentPageSpan = document.getElementById('currentPage');
+
+    const bookId = readerContent.dataset.bookId;
+    let currentPage = parseInt(readerContent.dataset.currentPage);
+    let totalPages = parseInt(readerContent.dataset.totalPages);
+
+    // Обработчики кнопок
+    prevPageBtn.addEventListener('click', goToPrevPage);
+    nextPageBtn.addEventListener('click', goToNextPage);
+
+    // Обработчики свайпов
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    readerContent.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    readerContent.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    // Обработчики клавиатуры
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            e.preventDefault();
+            goToPrevPage();
+        } else if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+            e.preventDefault();
+            goToNextPage();
+        }
+    });
+
+    // Обработчик изменения ориентации экрана
+    window.addEventListener('orientationchange', adjustReaderHeight);
+    window.addEventListener('resize', adjustReaderHeight);
+
+    function adjustReaderHeight() {
+        const readerContent = document.querySelector('.reader-content');
+        if (readerContent) {
+            const headerHeight = document.querySelector('.reader-header').offsetHeight;
+            const controlsHeight = document.querySelector('.reader-controls').offsetHeight;
+            const newHeight = window.innerHeight - headerHeight - controlsHeight - 40;
+            readerContent.style.maxHeight = `${newHeight}px`;
+        }
+    }
+
+    // Вызываем сразу для установки начальной высоты
+    adjustReaderHeight();
+
+    function handleSwipe() {
+        const threshold = 50;
+        if (touchEndX < touchStartX - threshold) {
+            goToNextPage();
+        } else if (touchEndX > touchStartX + threshold) {
+            goToPrevPage();
+        }
+    }
+
+    function goToPrevPage() {
+        if (currentPage > 1) {
+            loadPage(currentPage - 1);
+        }
+    }
+
+    function goToNextPage() {
+        if (currentPage < totalPages) {
+            loadPage(currentPage + 1);
+        }
+    }
+
+    function loadPage(page) {
+        fetch(`/book/${bookId}/content/${page}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                // Определяем направление анимации
+                const directionClass = page > currentPage ? 'slide-right' : 'slide-left';
+
+                // Применяем анимацию
+                readerContent.classList.add(directionClass);
+
+                setTimeout(() => {
+                    // Обновляем контент
+                    readerContent.innerHTML = data.content.replace(/\n/g, '<br>');
+                    currentPage = data.current_page;
+                    currentPageSpan.textContent = currentPage;
+                    totalPages = data.total_pages;
+
+                    // Обновляем состояние кнопок
+                    prevPageBtn.disabled = currentPage <= 1;
+                    nextPageBtn.disabled = currentPage >= totalPages;
+
+                    // Прокручиваем к верху
+                    readerContent.scrollTo(0, 0);
+
+                    // Удаляем класс анимации
+                    setTimeout(() => {
+                        readerContent.classList.remove(directionClass);
+                    }, 300);
+
+                    // Корректируем высоту после загрузки
+                    adjustReaderHeight();
+                }, 10);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Ошибка загрузки страницы');
+            });
+    }
+
+    function showError(message) {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
+        alert.style.zIndex = '1000';
+        alert.textContent = message;
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

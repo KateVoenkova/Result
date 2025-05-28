@@ -1,0 +1,69 @@
+# НЕ НУЖЕН - ADVANCED РАБОТАЕТ ЛУЧШЕ + ФУНКЦИОНАЛЬНЕЕ
+
+{% extends "base.html" %}
+
+{% block title %}Результаты поиска{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="fas fa-search me-2"></i>
+                    Результаты поиска: "{{ query }}"
+                    <small class="text-muted fs-6">({{ results|length }} найдено)</small>
+                </h2>
+                <a href="{{ url_for('advanced_search') }}?q={{ query }}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-sliders-h me-1"></i> Расширенный поиск
+                </a>
+            </div>
+
+            <div class="mt-2">
+                <span class="badge bg-info text-dark">
+                    {% if filter == 'title' %}
+                    <i class="fas fa-book me-1"></i> По названиям
+                    {% elif filter == 'author' %}
+                    <i class="fas fa-user-edit me-1"></i> По авторам
+                    {% else %}
+                    <i class="fas fa-users me-1"></i> По персонажам
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="search-params mb-4">
+            {% if year_from or year_to %}
+            <span class="badge bg-secondary me-2">
+                Год: {{ year_from if year_from else 'любой' }} - {{ year_to if year_to else 'любой' }}
+            </span>
+            {% endif %}
+            <span class="badge bg-secondary">
+                Сортировка: {{ sort_labels[sort] }}
+            </span>
+        </div>
+
+        <div class="card-body">
+            {% if results %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for book in results %}
+                <div class="col">
+                    {% include 'partials/book_card.html' %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Ничего не найдено. Попробуйте:
+                <ul class="mt-2">
+                    <li>Проверить правильность написания</li>
+                    <li>Использовать менее специфичные слова</li>
+                    <li><a href="{{ url_for('advanced_search') }}" class="alert-link">Попробовать расширенный поиск</a></li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Загрузка книг{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <h2 class="mb-0">
+                <i class="fas fa-upload me-2"></i>Загрузка книг
+            </h2>
+        </div>
+
+        <div class="card-body">
+            {% include 'partials/flash_messages.html' %}
+
+            <form id="uploadForm" method="POST" enctype="multipart/form-data" novalidate>
+                <div id="booksContainer">
+                    <!-- Первая книга (шаблон) -->
+                    <div class="book-entry mb-4 p-3 border rounded">
+                        <button type="button" class="btn btn-danger btn-sm float-end remove-book"
+                                style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+
+                        <div class="mb-3">
+                            <label class="form-label">Название книги <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control book-title" name="titles[0]" required>
+                            <div class="invalid-feedback">Укажите название книги</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Автор книги <span class="text-danger">*</span></label>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="author_last_names[0]"
+                                           placeholder="Фамилия" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="author_first_names[0]"
+                                           placeholder="Имя" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="author_middle_names[0]"
+                                           placeholder="Отчество">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Описание книги</label>
+                            <textarea class="form-control" name="descriptions[0]" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Текстовый файл (.txt) <span class="text-danger">*</span></label>
+                            <input class="form-control book-file" type="file" name="files" accept=".txt" required>
+                            <div class="form-text">Максимальный размер файла: 50 МБ</div>
+                            <div class="invalid-feedback">Выберите текстовый файл</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" id="addBookBtn" class="btn btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i> Добавить еще книгу
+                    </button>
+
+                    <div>
+                        <a href="{{ url_for('library') }}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-1"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-1"></i> Загрузить все
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Добавление новой книги
+    const addBookBtn = document.getElementById('addBookBtn');
+    const booksContainer = document.getElementById('booksContainer');
+    let bookCounter = 1;
+
+    addBookBtn.addEventListener('click', function() {
+        const newBookEntry = booksContainer.firstElementChild.cloneNode(true);
+        newBookEntry.querySelectorAll('input, textarea').forEach(el => {
+            el.value = '';
+            el.name = el.name.replace('[0]', `[${bookCounter}]`);
+            el.classList.remove('is-invalid');
+        });
+        newBookEntry.querySelector('.remove-book').style.display = 'block';
+        booksContainer.appendChild(newBookEntry);
+        bookCounter++;
+    });
+
+    // Удаление книги
+    booksContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-book') ||
+            e.target.closest('.remove-book')) {
+            if (booksContainer.children.length > 1) {
+                e.target.closest('.book-entry').remove();
+            }
+        }
+    });
+
+    // Валидация формы
+    const form = document.getElementById('uploadForm');
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+
+        document.querySelectorAll('.book-entry').forEach((entry, index) => {
+            const title = entry.querySelector('.book-title');
+            const fileInput = entry.querySelector('.book-file');
+
+            if (!title.value.trim()) {
+                title.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                fileInput.classList.add('is-invalid');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        form.classList.add('was-validated');
+    });
+});
+</script>
+
+<style>
+.book-entry {
+    position: relative;
+    background-color: #f8f9fa;
+}
+.remove-book {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+</style>
+{% endblock %}
