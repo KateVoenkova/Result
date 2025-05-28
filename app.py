@@ -783,18 +783,9 @@ def advanced_search():
 # Чтение
 # ---------------------------
 
-from flask import send_from_directory
-import os
-import chardet
-from datetime import datetime
-
-
-# ... другие импорты ...
-
 @app.route('/book/<int:book_id>/read')
 @login_required
 def read_book(book_id):
-    """Основной route для чтения книги с разбивкой на страницы"""
     book = Book.query.get_or_404(book_id)
 
     # Проверка прав доступа
@@ -804,100 +795,70 @@ def read_book(book_id):
     if not book.is_text_available:
         abort(404, description="Текст книги недоступен")
 
-    # Чтение файла с обработкой кодировки
-    filepath = book.get_file_path()
+    # Чтение файла
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(book.get_file_path(), 'r', encoding='utf-8') as f:
             content = f.read()
     except UnicodeDecodeError:
-        with open(filepath, 'rb') as f:
+        with open(book.get_file_path(), 'rb') as f:
             encoding = chardet.detect(f.read())['encoding']
-        with open(filepath, 'r', encoding=encoding) as f:
+        with open(book.get_file_path(), 'r', encoding=encoding) as f:
             content = f.read()
 
-    # Разбивка на страницы (~1500 символов на страницу)
-    pages = [content[i:i + 1500] for i in range(0, len(content), 1500)]
-
-    # Проверка прогресса чтения
+    # Получаем сохраненную позицию
     progress = ReadingProgress.query.filter_by(
         user_id=current_user.id,
         book_id=book.id
     ).first()
 
-    start_page = progress.current_page if progress else 1
-
     return render_template('books/reader.html',
                            book=book,
-                           pages=pages,
-                           current_page=start_page,
-                           total_pages=len(pages))
+                           full_content=content,
+                           book_id=book.id)
 
 
-@app.route('/book/<int:book_id>/content/<int:page>')
+# API для сохранения прогресса
+@app.route('/api/save_reading_progress', methods=['POST'])
 @login_required
-def get_book_page(book_id, page):
-    """API для получения конкретной страницы книги (AJAX)"""
-    book = Book.query.get_or_404(book_id)
+def save_reading_progress():
+    data = request.get_json()
+    book_id = data.get('book_id')
+    position = data.get('position', 0)
 
-    if not book.is_text_available:
-        return jsonify({"error": "Текст недоступен"}), 404
-
-    filepath = book.get_file_path()
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-    except UnicodeDecodeError:
-        with open(filepath, 'rb') as f:
-            encoding = chardet.detect(f.read())['encoding']
-        with open(filepath, 'r', encoding=encoding) as f:
-            content = f.read()
-
-    pages = [content[i:i + 1500] for i in range(0, len(content), 1500)]
-
-    if page < 1 or page > len(pages):
-        return jsonify({"error": "Неверный номер страницы"}), 400
-
-    # Обновляем прогресс чтения
     progress = ReadingProgress.query.filter_by(
         user_id=current_user.id,
-        book_id=book.id
+        book_id=book_id
     ).first()
 
     if not progress:
         progress = ReadingProgress(
             user_id=current_user.id,
-            book_id=book.id,
-            current_page=page
+            book_id=book_id,
+            position=position,
+            last_read=datetime.utcnow()
         )
         db.session.add(progress)
     else:
-        progress.current_page = page
+        progress.position = position
         progress.last_read = datetime.utcnow()
 
     db.session.commit()
 
-    return jsonify({
-        "content": pages[page - 1],
-        "current_page": page,
-        "total_pages": len(pages)
-    })
+    return jsonify({'status': 'success'})
 
 
-@app.route('/book/<int:book_id>/download')
+# Получение текущей позиции
+@app.route('/api/get_reading_progress/<int:book_id>')
 @login_required
-def download_book(book_id):
-    """Скачивание оригинального файла книги"""
-    book = Book.query.get_or_404(book_id)
+def get_reading_progress(book_id):
+    progress = ReadingProgress.query.filter_by(
+        user_id=current_user.id,
+        book_id=book_id
+    ).first()
 
-    if not book.is_text_available:
-        abort(404)
-
-    return send_from_directory(
-        current_app.config['UPLOAD_FOLDER'],
-        book.original_file,
-        as_attachment=True,
-        download_name=f"{book.title}.txt"
-    )
+    return jsonify({
+        'position': progress.position if progress else 0
+    })
 
 # ---------------------------
 # Инициализация приложения

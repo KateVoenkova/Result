@@ -73,18 +73,20 @@ class Book(db.Model):
 
 
 class ReadingProgress(db.Model):
-    """Модель для хранения прогресса чтения"""
     __tablename__ = 'reading_progress'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
-    current_page = db.Column(db.Integer, default=1)
+    position = db.Column(db.Integer, default=0)  # Позиция в тексте (символ)
     last_read = db.Column(db.DateTime, default=datetime.utcnow)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    book = db.relationship('Book', backref='reading_progresses')
-    user = db.relationship('User', backref='reading_progresses')
+    user = db.relationship('User', backref='reading_progress')
+    book = db.relationship('Book', backref='reading_progress')
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'book_id', name='unique_user_book_progress'),
+    )
 
 
 class BookAnalysis(db.Model):
