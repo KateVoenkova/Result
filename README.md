@@ -26,7 +26,7 @@
 - Bootstrap 5
 - Font Awesome
 - D3.js (для визуализации графов)
-- Vanilla JavaScript
+- JavaScript
 
 ### Анализ текста
 - Pymorphy2 (для морфологического анализа)
