@@ -14,7 +14,7 @@ RUN dos2unix /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Открываем порт (по умолчанию 5000 для Flask)
-EXPOSE 1199
+EXPOSE 1198
 
 # Запускаем Gunicorn, указывая модуль и приложение (app:app)
 WORKDIR /app

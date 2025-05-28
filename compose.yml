@@ -5,12 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: Weather
+    container_name: result
     environment:
       - FLASK_ENV=production
       - UPLOAD_FOLDER=/app/uploads
     ports:
-      - "1199:1199"
+      - "1198:1198"
     volumes:
       - ./uploads:/app/uploads
       - ./static:/app/static

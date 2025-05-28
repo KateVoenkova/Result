@@ -1,2 +1,2 @@
-cp flask_app.nginx.conf /etc/nginx/sites-enabled/weather.nginx.conf
-certbot --nginx -d weather.silaeder.codingprojects.ru
+cp flask_app.nginx.conf /etc/nginx/sites-enabled/sunnyweather.nginx.conf
+certbot --nginx -d sunnyweather.silaeder.codingprojects.ru
