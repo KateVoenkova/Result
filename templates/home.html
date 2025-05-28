@@ -1,103 +1,365 @@
 {% extends "base.html" %}
 
-{% block title %}Главная страница{% endblock %}
+{% block title %}LiNet - Онлайн библиотека{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Подключение Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+<div class="home-page">
     <!-- Hero Section -->
-    <div class="card shadow mb-5">
-        <div class="card-body p-5 text-center bg-light rounded">
-            <h1 class="display-4 mb-4">Анализ литературных произведений</h1>
-            <p class="lead">Визуализируйте связи между персонажами и исследуйте структуру произведений</p>
-        </div>
-    </div>
-
-    <!-- Purpose Section -->
-    <div class="card shadow mb-5">
-        <div class="card-header bg-white">
-            <h2 class="h3 mb-0">Для чего нужен этот сайт</h2>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-4 mb-md-0">
-                    <div class="h-100 p-4 bg-light rounded">
-                        <h3 class="h4"><i class="fas fa-book-open me-2"></i>Анализ текста</h3>
-                        <p>Загружайте тексты литературных произведений, и система автоматически определит персонажей и их взаимосвязи.</p>
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12 col-lg-6 order-lg-1 order-2">
+                    <h1 class="hero-title">LiNet - Ваша интеллектуальная онлайн библиотека</h1>
+                    <p class="hero-subtitle">Читайте, анализируйте, исследуйте литературные произведения на новом уровне</p>
+                    <div class="hero-buttons d-flex flex-wrap gap-3">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('library') }}" class="btn btn-primary btn-lg flex-grow-1">Перейти в библиотеку</a>
+                        {% else %}
+                            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg flex-grow-1">Присоединиться</a>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg flex-grow-1">Войти</a>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="h-100 p-4 bg-light rounded">
-                        <h3 class="h4"><i class="fas fa-project-diagram me-2"></i>Визуализация</h3>
-                        <p>Наглядные графики показывают частоту взаимодействий между персонажами и помогают понять структуру произведения.</p>
+                <div class="col-12 col-lg-6 order-lg-2 order-1 mb-4 mb-lg-0">
+                    <img src="{{ url_for('static', filename='images/hero-image.png') }}"
+                         alt="Читательский опыт"
+                         class="img-fluid hero-image rounded-3 shadow">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Возможности LiNet</h2>
+
+            <div class="row g-4">
+                <!-- Feature Cards -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon bg-primary">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3 class="feature-title">Чтение книг онлайн</h3>
+                        <p class="feature-description">
+                            Удобный ридер с настройками шрифта, фона и запоминанием прогресса чтения.
+                            Читайте где угодно без скачивания файлов.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon bg-success">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h3 class="feature-title">Анализ связей персонажей</h3>
+                        <p class="feature-description">
+                            Автоматическое построение графа отношений между персонажами.
+                            Визуализация их взаимодействий.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon bg-info">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                        <h3 class="feature-title">Рецензии и анализы</h3>
+                        <p class="feature-description">
+                            Пишите собственные анализы произведений, делитесь мнениями.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon bg-warning">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h3 class="feature-title">Личная библиотека</h3>
+                        <p class="feature-description">
+                            Добавляйте свои книги в формате TXT, систематизируйте
+                            их по авторам. Доступ с любого устройства.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon bg-danger">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="feature-title">Умный поиск</h3>
+                        <p class="feature-description">
+                            Ищите книги по названию, автору или даже персонажам.
+                            Фильтруйте по удобным параметрам.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works py-5 bg-light">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Как это работает</h2>
+
+            <div class="steps">
+                <div class="step row align-items-center g-4">
+                    <div class="col-2 col-sm-1">
+                        <div class="step-number">1</div>
+                    </div>
+                    <div class="col-10 col-sm-11">
+                        <div class="step-content">
+                            <h3>Загрузите книгу</h3>
+                            <p>Добавьте текстовый файл книги в свою библиотеку, укажите автора и описание.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step row align-items-center g-4">
+                    <div class="col-2 col-sm-1">
+                        <div class="step-number">2</div>
+                    </div>
+                    <div class="col-10 col-sm-11">
+                        <div class="step-content">
+                            <h3>Система анализирует текст</h3>
+                            <p>LiNet автоматически определит персонажей и построит граф их отношений.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step row align-items-center g-4">
+                    <div class="col-2 col-sm-1">
+                        <div class="step-number">3</div>
+                    </div>
+                    <div class="col-10 col-sm-11">
+                        <div class="step-content">
+                            <h3>Читайте и исследуйте</h3>
+                            <p>Используйте удобный ридер, изучайте связи персонажей, добавляйте свои анализы.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Comparison Section -->
-    <div class="card shadow mb-5">
-        <div class="card-header bg-white">
-            <h2 class="h3 mb-0">Сравнительный анализ произведений</h2>
+    <!-- Call to Action -->
+    <section class="cta-section py-5 text-center">
+        <div class="container">
+            <h2 class="mb-4">Готовы читать?</h2>
+            <p class="lead mb-4">Присоединяйтесь к LiNet</p>
+            <a href="{% if current_user.is_authenticated %}{{ url_for('library') }}{% else %}{{ url_for('register') }}{% endif %}"
+               class="btn btn-primary btn-lg px-5">
+                {% if current_user.is_authenticated %}Перейти в библиотеку{% else %}Зарегистрироваться{% endif %}
+            </a>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-4 mb-md-0">
-                    <div class="h-100 p-4 bg-light rounded">
-                        <h3 class="h4">"Война и мир" Л.Н. Толстого</h3>
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Более 500 персонажей</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Сложная иерархия взаимоотношений</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Исторический контекст влияет на связи</li>
-                            <li><i class="fas fa-check-circle text-success me-2"></i>Множество семейных кланов</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="h-100 p-4 bg-light rounded">
-                        <h3 class="h4">"Унесённые ветром" М. Митчелл</h3>
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Около 50 основных персонажей</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Ярко выраженные центральные персонажи</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Романтические связи преобладают</li>
-                            <li><i class="fas fa-check-circle text-success me-2"></i>Социальные изменения как фон для отношений</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Graph Introduction Section -->
-    <div class="card shadow">
-        <div class="card-header bg-white">
-            <h2 class="h3 mb-0">Исследуйте графы связей</h2>
-        </div>
-        <div class="card-body text-center">
-            <p class="lead mb-4">Наши интерактивные графы помогут вам по-новому взглянуть на знакомые произведения</p>
-
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <a href="{{ url_for('library') }}" class="btn btn-primary btn-lg px-4 py-2">
-                    <i class="fas fa-book me-2"></i>Библиотека
-                </a>
-                {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg px-4 py-2">
-                        <i class="fas fa-upload me-2"></i>Загрузить книгу
-                    </a>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-info btn-lg px-4 py-2">
-                        <i class="fas fa-user me-2"></i>Личный кабинет
-                    </a>
-                {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-info btn-lg px-4 py-2">
-                        <i class="fas fa-sign-in-alt me-2"></i>Войти
-                    </a>
-                {% endif %}
-            </div>
-
-        </div>
-    </div>
+    </section>
 </div>
+
+<style>
+/* Base Styles */
+.home-page {
+    overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero-section {
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+}
+
+@media (min-width: 768px) {
+    .hero-section {
+        padding: 5rem 0;
+    }
+}
+
+.hero-title {
+    font-size: calc(1.5rem + 1.5vw);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: calc(1rem + 0.3vw);
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.hero-image {
+    max-height: 400px;
+    width: auto;
+    object-fit: contain;
+}
+
+.hero-buttons .btn {
+    min-width: 200px;
+}
+
+/* Features Section */
+.features-section {
+    padding: 3rem 0;
+}
+
+@media (min-width: 768px) {
+    .features-section {
+        padding: 5rem 0;
+    }
+}
+
+.section-title {
+    font-size: calc(1.5rem + 1vw);
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: #2575fc;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+@media (min-width: 768px) {
+    .feature-card {
+        padding: 2rem;
+    }
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.feature-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+/* How It Works Section */
+.how-it-works {
+    padding: 3rem 0;
+}
+
+@media (min-width: 768px) {
+    .how-it-works {
+        padding: 5rem 0;
+    }
+}
+
+.steps {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.step {
+    margin-bottom: 2rem;
+}
+
+.step-number {
+    background: #2575fc;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.step-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.step-content p {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 3rem 0;
+    background: #f8f9fa;
+}
+
+@media (min-width: 768px) {
+    .cta-section {
+        padding: 5rem 0;
+    }
+}
+
+.cta-section h2 {
+    font-size: calc(1.5rem + 0.8vw);
+    font-weight: 700;
+}
+
+.cta-section .lead {
+    font-size: calc(1rem + 0.3vw);
+}
+
+/* Extra small devices (phones, 576px and down) */
+@media (max-width: 576px) {
+    .hero-buttons .btn {
+        width: 100%;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+}
+</style>
 {% endblock %}
